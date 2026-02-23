@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cradley Heath Bowls Scoreboard V8.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+    --panel-border: #ffff00;
+    --accent-color: #ffff00;
+}
+
+/* Base reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+/* HIGH‑VIS ALWAYS ON */
+body {
+    font-family: Arial, sans-serif;
+    background: #000000;
+    color: #ffff00;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Header */
+header {
+    padding: 4px 6px;
+    background: #001900;
+    border-bottom: 2px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+header h1 {
+    font-size: 1.05rem;
+    white-space: nowrap;
+}
+
+.header-right {
+    display: flex;
+    gap: 4px;
+}
+
+/* Setup Panel */
+#setupPanel {
+    background: #002200;
+    border-bottom: 2px solid var(--panel-border);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.setup-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.setup-row label {
+    min-width: 70px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.setup-row input,
+.setup-row select {
+    flex: 1;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid var(--panel-border);
+    background: #ffffff;
+    color: #000000;
+    font-size: 0.9rem;
+}
+
+/* Main */
+main {
+    flex: 1;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    gap: 6px;
+}
+
+#gamesContainer {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding-right: 4px;
+}
+
+/* Game Blocks */
+.game-block {
+    background: #003300;
+    border: 2px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.game-title {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--accent-color);
+    text-align: center;
+    text-shadow: 0 0 4px #000;
+}
+
+/* Inputs */
+.text-input, .player-select {
+    width: 100%;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid var(--panel-border);
+    background: #ffffff;
+    color: #000000;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.score-input {
+    width: 60px;
+    padding: 4px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid red;
+    background: #ffffff;
+    color: #000000;
+}
+
+.team-row {
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    gap: 6px;
+}
+
+/* Totals */
+#totalsBar {
+    border-top: 1px solid var(--panel-border);
+    padding-top: 4px;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffff00;
+}
+
+/* Info Button */
+#infoButton {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--panel-border);
+    background: #001900;
+    color: #ffff00;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#infoPanel {
+    position: fixed;
+    right: 10px;
+    bottom: 50px;
+    background: #000000;
+    color: #ffff00;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    max-width: 260px;
+    display: none;
+    border: 1px solid #ffff00;
+}
+
+/* Responsive Grid */
+@media (min-width: 900px) {
+    #gamesContainer { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1400px) {
+    #gamesContainer { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* TV Mode */
+@media (min-width: 1000px) {
+    body.tv-6 #gamesContainer { grid-template-columns: repeat(3, 1fr); }
+    body.tv-8 #gamesContainer { grid-template-columns: repeat(4, 1fr); }
+
+    body.tv-6 .game-block,
+    body.tv-8 .game-block {
+        padding: 24px;
+        border-width: 4px;
+        gap: 18px;
+    }
+
+    body.tv-6 .game-title,
+    body.tv-8 .game-title {
+        font-size: 2.1rem;
+        margin-bottom: 10px;
+    }
+
+    body.tv-6 .text-input,
+    body.tv-8 .text-input,
+    body.tv-6 .player-select,
+    body.tv-8 .player-select {
+        font-size: 1.9rem;
+        padding: 12px;
+        height: 70px;
+        width: 100%;
+    }
+
+    body.tv-6 .score-input,
+    body.tv-8 .score-input {
+        font-size: 3.2rem;
+        width: 130px;
+        height: 70px;
+        padding: 10px;
+    }
+
+    body.tv-6 #totalsBar,
+    body.tv-8 #totalsBar {
+        font-size: 2.2rem;
+        padding: 14px 0;
+    }
+}
+
+/* ---------------------------------------------------------
+   V8.0 — TEAM MANAGER PANEL
+--------------------------------------------------------- */
+
+#teamManagerPanel {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 420px;
+    background: #001900;
+    border: 2px solid #ffff00;
+    padding: 12px;
+    border-radius: 6px;
+    display: none;
+    z-index: 9999;
+}
+
+#teamManagerPanel h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #ffff00;
+}
+
+.tm-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+#teamList {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ffff00;
+    padding: 6px;
+}
+
+.team-block {
+    border: 1px solid #ffff00;
+    padding: 6px;
+    margin-bottom: 8px;
+}
+
+.team-block h3 {
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+.player-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.player-row input {
+    flex: 1;
+}
+
+#closeTeamManagerBtn {
+    margin-top: 10px;
+    width: 100%;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Cradley Heath Bowls Scoreboard V8.1</h1>
+    <div class="header-right">
+        <button id="tvModeBtn">TV Mode</button>
+        <button id="teamManagerBtn">Teams</button>
+    </div>
+</header>
+
+<div id="setupPanel">
+    <div class="setup-row">
+        <label>Match Type:</label>
+        <select id="matchType">
+            <option value="6" selected>6 Games</option>
+            <option value="8">8 Games</option>
+        </select>
+    </div>
+
+    <div class="setup-row">
+        <label>Home Team:</label>
+        <input list="teamListHome" id="homeTeamInput" placeholder="Cradley Heath A">
+        <datalist id="teamListHome"></datalist>
+    </div>
+
+    <div class="setup-row">
+        <label>Away Team:</label>
+        <input list="teamListAway" id="awayTeamInput" placeholder="Away Team">
+        <datalist id="teamListAway"></datalist>
+    </div>
+
+    <div class="setup-row">
+        <button id="hideSetupBtn">Hide Setup</button>
+        <button id="resetScoresBtn">Reset All Scores</button>
+        <button id="fullscreenBtn">Full Screen</button>
+    </div>
+</div>
+
+<button id="showSetupBtn">Show Setup</button>
+
+<main>
+    <div id="gamesContainer"></div>
+    <div id="totalsBar">TOTALS | Home: 0    Away: 0</div>
+</main>
+
+<button id="infoButton">i</button>
+<div id="infoPanel">
+    <strong>Scoreboard V8.1</strong><br>
+    - High‑Vis Always On<br>
+    - 6/8 Game Selector<br>
+    - Local Save & Restore<br>
+    - TV Mode<br>
+    - Team Manager<br>
+    - Player Dropdowns (V8.1)<br>
+</div>
+
+<div id="teamManagerPanel">
+    <h2>Team Manager</h2>
+
+    <div class="tm-row">
+        <input id="newTeamName" placeholder="New team name">
+        <button id="addTeamBtn">Add Team</button>
+    </div>
+
+    <div id="teamList"></div>
+
+    <button id="closeTeamManagerBtn">Close</button>
+</div>
+
+<script>
+let allGames = [];
+let tvModeForced = false;
+
+const matchTypeSelect = document.getElementById("matchType");
+const gamesContainer = document.getElementById("gamesContainer");
+const totalsBar = document.getElementById("totalsBar");
+const homeTeamInput = document.getElementById("homeTeamInput");
+const awayTeamInput = document.getElementById("awayTeamInput");
+const hideSetupBtn = document.getElementById("hideSetupBtn");
+const showSetupBtn = document.getElementById("showSetupBtn");
+const resetScoresBtn = document.getElementById("resetScoresBtn");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+const setupPanel = document.getElementById("setupPanel");
+const infoButton = document.getElementById("infoButton");
+const infoPanel = document.getElementById("infoPanel");
+const tvModeBtn = document.getElementById("tvModeBtn");
+
+const teamListHome = document.getElementById("teamListHome");
+const teamListAway = document.getElementById("teamListAway");
+
+const TEAM_STORAGE_KEY = "chb_teams_v80";
+let teams = {};
+
+const STORAGE_KEY = "chb_scoreboard_v75_3";
+
+/* GAME DATA */
+function createGameData(total) {
+    allGames = [];
+    for (let i = 1; i <= total; i++) {
+        allGames.push({ rink: i, homePlayers: "", awayPlayers: "", homeScore: "", awayScore: "" });
+    }
+}
+
+/* ---------------------------------------------------------
+   V8.1 — PLAYER DROPDOWN HELPERS
+--------------------------------------------------------- */
+
+function populateTeamDropdowns() {
+    teamListHome.innerHTML = "";
+    teamListAway.innerHTML = "";
+
+    Object.keys(teams).forEach(team => {
+        const opt1 = document.createElement("option");
+        opt1.value = team;
+        teamListHome.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = team;
+        teamListAway.appendChild(opt2);
+    });
+}
+
+function getPlayersForTeam(teamName) {
+    return teams[teamName] || [];
+}
+
+function clearPlayersForSide(side) {
+    allGames.forEach((g, index) => {
+        g[side] = "";
+        const input = gamesContainer.querySelector(`input[data-index="${index}"][data-field="${side}"]`);
+        if (input) input.value = "";
+    });
+}
+
+/* RENDER GAMES */
+function renderGamesOnce() {
+    gamesContainer.innerHTML = "";
+    allGames.forEach((g, index) => {
+        const block = document.createElement("div");
+        block.className = "game-block";
+
+        block.innerHTML = `
+            <div class="game-title">Game ${g.rink}</div>
+
+            <div class="team-row">
+                <input list="homePlayersList${index}" class="text-input" placeholder="Home player" data-index="${index}" data-field="homePlayers">
+                <datalist id="homePlayersList${index}"></datalist>
+                <input type="number" inputmode="numeric" class="score-input" data-index="${index}" data-field="homeScore">
+            </div>
+
+            <div class="team-row">
+                <input list="awayPlayersList${index}" class="text-input" placeholder="Away player" data-index="${index}" data-field="awayPlayers">
+                <datalist id="awayPlayersList${index}"></datalist>
+                <input type="number" inputmode="numeric" class="score-input" data-index="${index}" data-field="awayScore">
+            </div>
+        `;
+
+        gamesContainer.appendChild(block);
+    });
+
+    attachInputListeners();
+    updatePlayerDropdowns();
+}
+
+/* UPDATE PLAYER DROPDOWNS */
+function updatePlayerDropdowns() {
+    const homeTeam = homeTeamInput.value.trim();
+    const awayTeam = awayTeamInput.value.trim();
+
+    allGames.forEach((g, index) => {
+        const homeList = document.getElementById(`homePlayersList${index}`);
+        const awayList = document.getElementById(`awayPlayersList${index}`);
+
+        homeList.innerHTML = "";
+        awayList.innerHTML = "";
+
+        getPlayersForTeam(homeTeam).forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p;
+            homeList.appendChild(opt);
+        });
+
+        getPlayersForTeam(awayTeam).forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p;
+            awayList.appendChild(opt);
+        });
+    });
+}
+
+/* SAVE STATE */
+function saveState() {
+    const state = {
+        matchType: matchTypeSelect.value,
+        homeTeam: homeTeamInput.value,
+        awayTeam: awayTeamInput.value,
+        games: allGames,
+        tvModeForced: tvModeForced
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+/* LOAD STATE */
+function loadState() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const state = JSON.parse(raw);
+        if (!state || !Array.isArray(state.games)) return;
+
+        matchTypeSelect.value = state.matchType || "6";
+
+        createGameData(state.games.length);
+        for (let i = 0; i < allGames.length; i++) {
+            allGames[i] = state.games[i];
+        }
+
+        renderGamesOnce();
+
+        homeTeamInput.value = state.homeTeam || "";
+        awayTeamInput.value = state.awayTeam || "";
+
+        tvModeForced = !!state.tvModeForced;
+        tvModeBtn.classList.toggle("active", tvModeForced);
+        applyTVMode();
+
+        allGames.forEach((g, index) => {
+            const homeP = gamesContainer.querySelector(`input[data-index="${index}"][data-field="homePlayers"]`);
+            const awayP = gamesContainer.querySelector(`input[data-index="${index}"][data-field="awayPlayers"]`);
+            const homeS = gamesContainer.querySelector(`input[data-index="${index}"][data-field="homeScore"]`);
+            const awayS = gamesContainer.querySelector(`input[data-index="${index}"][data-field="awayScore"]`);
+            if (homeP) homeP.value = g.homePlayers;
+            if (awayP) awayP.value = g.awayPlayers;
+            if (homeS) homeS.value = g.homeScore;
+            if (awayS) awayS.value = g.awayScore;
+        });
+
+        updatePlayerDropdowns();
+        updateTotals();
+    } catch (e) {}
+}
+
+/* INPUT LISTENERS */
+function attachInputListeners() {
+    const inputs = gamesContainer.querySelectorAll("input");
+    inputs.forEach(input => {
+        input.addEventListener("input", e => {
+            const idx = parseInt(e.target.dataset.index);
+            const field = e.target.dataset.field;
+            allGames[idx][field] = e.target.value;
+            if (field && field.includes("Score")) updateTotals();
+            saveState();
+        });
+    });
+}
+
+/* TOTALS */
+function updateTotals() {
+    let homeTotal = 0, awayTotal = 0;
+    allGames.forEach(g => {
+        const h = parseInt(g.homeScore);
+        const a = parseInt(g.awayScore);
+        if (!isNaN(h)) homeTotal += h;
+        if (!isNaN(a)) awayTotal += a;
+    });
+    totalsBar.innerHTML = `TOTALS | ${homeTeamInput.value || "Home"}: ${homeTotal}    ${awayTeamInput.value || "Away"}: ${awayTotal}`;
+}
+
+/* TV MODE */
+function applyTVMode() {
+    document.body.classList.remove("tv-6", "tv-8");
+    const total = parseInt(matchTypeSelect.value);
+    if (tvModeForced) {
+        if (total === 6) document.body.classList.add("tv-6");
+        if (total === 8) document.body.classList.add("tv-8");
+    }
+}
+
+/* ---------------------------------------------------------
+   V8.0 — TEAM MANAGER LOGIC
+--------------------------------------------------------- */
+
+const teamManagerBtn = document.getElementById("teamManagerBtn");
+const teamManagerPanel = document.getElementById("teamManagerPanel");
+const closeTeamManagerBtn = document.getElementById("closeTeamManagerBtn");
+const newTeamName = document.getElementById("newTeamName");
+const addTeamBtn = document.getElementById("addTeamBtn");
+const teamList = document.getElementById("teamList");
+
+/* Load teams */
+function loadTeams() {
+    try {
+        const raw = localStorage.getItem(TEAM_STORAGE_KEY);
+        if (raw) teams = JSON.parse(raw);
+    } catch (e) {}
+}
+
+/* Save teams */
+function saveTeams() {
+    try {
+        localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(teams));
+    } catch (e) {}
+}
+
+/* Render team list */
+function renderTeams() {
+    teamList.innerHTML = "";
+
+    Object.keys(teams).forEach(teamName => {
+        const block = document.createElement("div");
+        block.className = "team-block";
+
+        block.innerHTML = `
+            <h3>${teamName}</h3>
+            <div class="players"></div>
+            <div class="tm-row">
+                <input class="new-player-input" placeholder="Add player">
+                <button class="add-player-btn">Add</button>
+            </div>
+            <button class="delete-team-btn">Delete Team</button>
+        `;
+
+        const playersDiv = block.querySelector(".players");
+
+        teams[teamName].forEach((player, index) => {
+            const row = document.createElement("div");
+            row.className = "player-row";
+            row.innerHTML = `
+                <input value="${player}">
+                <button class="remove-player-btn">X</button>
+            `;
+
+            row.querySelector(".remove-player-btn").addEventListener("click", () => {
+                teams[teamName].splice(index, 1);
+                saveTeams();
+                renderTeams();
+                updatePlayerDropdowns();
+            });
+
+            playersDiv.appendChild(row);
+        });
+
+        block.querySelector(".add-player-btn").addEventListener("click", () => {
+            const input = block.querySelector(".new-player-input");
+            const name = input.value.trim();
+            if (name) {
+                teams[teamName].push(name);
+                input.value = "";
+                saveTeams();
+                renderTeams();
+                updatePlayerDropdowns();
+            }
+        });
+
+        block.querySelector(".delete-team-btn").addEventListener("click", () => {
+            delete teams[teamName];
+            saveTeams();
+            renderTeams();
+            populateTeamDropdowns();
+            updatePlayerDropdowns();
+        });
+
+        teamList.appendChild(block);
+    });
+}
+
+/* Team Manager events */
+teamManagerBtn.addEventListener("click", () => {
+    teamManagerPanel.style.display = "block";
+    renderTeams();
+});
+
+closeTeamManagerBtn.addEventListener("click", () => {
+    teamManagerPanel.style.display = "none";
+});
+
+addTeamBtn.addEventListener("click", () => {
+    const name = newTeamName.value.trim();
+    if (name && !teams[name]) {
+        teams[name] = [];
+        newTeamName.value = "";
+        saveTeams();
+        renderTeams();
+        populateTeamDropdowns();
+    }
+});
+
+/* EVENTS */
+matchTypeSelect.addEventListener("change", () => {
+    const total = parseInt(matchTypeSelect.value);
+    createGameData(total);
+    renderGamesOnce();
+    updatePlayerDropdowns();
+    updateTotals();
+    applyTVMode();
+    saveState();
+});
+
+hideSetupBtn.addEventListener("click", () => {
+    setupPanel.style.display = "none";
+    showSetupBtn.style.display = "block";
+});
+
+showSetupBtn.addEventListener("click", () => {
+    setupPanel.style.display = "flex";
+    showSetupBtn.style.display = "none";
+});
+
+resetScoresBtn.addEventListener("click", () => {
+    allGames.forEach(g => { 
+        g.homeScore = ""; 
+        g.awayScore = ""; 
+        g.homePlayers = ""; 
+        g.awayPlayers = ""; 
+    });
+    renderGamesOnce();
+    updatePlayerDropdowns();
+    updateTotals();
+    saveState();
+});
+
+fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen().catch(() => {});
+    }
+});
+
+tvModeBtn.addEventListener("click", () => {
+    tvModeForced = !tvModeForced;
+    tvModeBtn.classList.toggle("active", tvModeForced);
+    applyTVMode();
+    saveState();
+});
+
+infoButton.addEventListener("click", () => {
+    infoPanel.style.display = infoPanel.style.display === "block" ? "none" : "block";
+});
+
+document.addEventListener("click", e => {
+    if (!infoPanel.contains(e.target) && e.target !== infoButton) infoPanel.style.display = "none";
+});
+
+homeTeamInput.addEventListener("input", () => { 
+    clearPlayersForSide("homePlayers");   // clear all home players on team change
+    updatePlayerDropdowns(); 
+    updateTotals(); 
+    saveState(); 
+});
+
+awayTeamInput.addEventListener("input", () => { 
+    clearPlayersForSide("awayPlayers");   // clear all away players on team change
+    updatePlayerDropdowns(); 
+    updateTotals(); 
+    saveState(); 
+});
+
+/* INIT */
+function init() {
+    loadTeams();
+    populateTeamDropdowns();
+    createGameData(6);
+    renderGamesOnce();
+    loadState();
+    updatePlayerDropdowns();
+    updateTotals();
+    applyTVMode();
+}
+init();
+</script>
+
+</body>
+</html>
